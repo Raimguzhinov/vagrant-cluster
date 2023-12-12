@@ -1,0 +1,22 @@
+nodes = [
+  { :hostname => "dias", :ip => "10.10.17.113" },
+  { :hostname => "yana", :ip => "10.10.17.112" },
+]
+
+Vagrant.configure("2") do |config|
+  nodes.each do |node|
+    config.vm.define node[:hostname] do |nodeconfig|
+      nodeconfig.vm.box = "generic/alpine318"
+      nodeconfig.vm.hostname = node[:hostname]
+      nodeconfig.vm.network "private_network", ip: node[:ip]
+      nodeconfig.vm.provider "qemu" do |qe|
+        qe.arch = "x86_64"
+        qe.machine = "q35"
+        qe.cpu = "qemu64"
+        qe.net_device = "virtio-net-pci"
+        qe.qemu_dir = "/usr/local/share/qemu"
+        qe.ssh_port = 2220 + nodes.index(node)
+      end
+    end
+  end
+end
