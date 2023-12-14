@@ -1,6 +1,6 @@
 nodes = [
-  { :hostname => "dias", :ip => "10.10.17.113" },
-  { :hostname => "yana", :ip => "10.10.17.112" },
+  { :hostname => "dias", :ip => "10.10.17.113", :ssh_key => "#{Dir.home}/.ssh/id_rsa.pub" },
+  { :hostname => "yana", :ip => "10.10.17.112", :ssh_key => "#{Dir.home}/Downloads/id_rsa.pub" },
 ]
 
 Vagrant.configure("2") do |config|
@@ -15,8 +15,20 @@ Vagrant.configure("2") do |config|
         qe.cpu = "qemu64"
         qe.net_device = "virtio-net-pci"
         qe.qemu_dir = "/usr/local/share/qemu"
-        qe.ssh_port = 2220 + nodes.index(node)
+        qe.ssh_port = 2222 + nodes.index(node)
+      end
+      nodeconfig.vm.provision "shell" do |s|
+        ssh_pub_key = File.readlines(node[:ssh_key]).first.strip
+        s.inline = <<-SHELL
+        echo "#{ssh_pub_key}" >> /home/vagrant/.ssh/authorized_keys
+        sed -i 's/PasswordAuthentication yes/PasswordAuthentication no/g' /etc/ssh/sshd_config
+        sed -i 's/PubkeyAuthentication no/PubkeyAuthentication yes/g' /etc/ssh/sshd_config
+        service sshd restart
+        SHELL
       end
     end
+  end
+  config.vm.provision "ansible" do |ansible|
+    ansible.playbook = "playbook.yml"
   end
 end
