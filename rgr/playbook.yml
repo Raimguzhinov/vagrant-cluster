@@ -1,0 +1,27 @@
+---
+- name: Configure and Install Cluster
+  hosts: all
+  become: yes
+
+  tasks:
+    - name: Install required packages
+      apk:
+        name: 
+          # - slurm
+          - openmpi
+        state: present
+    
+    - include_tasks: nfs-client.yml
+  #
+  #   - name: Configure SLURM
+  #     template:
+  #       src: slurm.conf
+  #       dest: /etc/slurm/slurm.conf
+  #     notify: restart slurmctld
+  #
+  # handlers:
+  #   - name: restart slurmctld
+  #     systemd:
+  #       name: slurmctld
+  #       state: restarted
+

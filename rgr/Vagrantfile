@@ -45,7 +45,7 @@ Vagrant.configure("2") do |config|
         SHELL
       end
       nodeconfig.vm.provision "ansible" do |ansible|
-        ansible.playbook = "nfs-client.yml"
+        ansible.playbook = "playbook.yml"
       end
     end
   end

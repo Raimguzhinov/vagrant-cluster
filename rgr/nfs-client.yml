@@ -1,21 +1,17 @@
 ---
-- hosts: all
-  become: yes
-   
-  tasks:
-    - name: Install nfs-utils
-      apk:
-        name: 
-          - nfs-utils
-        state: present
+- name: Install nfs-utils
+  apk:
+    name: 
+      - nfs-utils
+    state: present
 
-    - name: Create a mountable directory if it does not exist
-      file:
-        path: /home/vagrant/web_storage
-        state: directory
-        owner: vagrant
-        group: vagrant
-        mode: '0775'
-    
-    - name: Mount volumn
-      shell: sudo mount 10.10.17.100:/home/vagrant/nfs_test /home/vagrant/web_storage
+- name: Create a mountable directory if it does not exist
+  file:
+    path: /home/vagrant/web_storage
+    state: directory
+    owner: vagrant
+    group: vagrant
+    mode: '0775'
+
+- name: Mount volumn
+  shell: sudo mount 10.10.17.100:/home/vagrant/nfs_test /home/vagrant/web_storage
