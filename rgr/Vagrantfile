@@ -4,18 +4,34 @@ nodes = [
 ]
 
 Vagrant.configure("2") do |config|
+  config.ssh.insert_key = false
+
+  config.vm.define "mynfsserver" do |mynfsserver|
+    mynfsserver.vm.hostname = "mynfsserver"
+    mynfsserver.vm.box = "generic/alpine318"
+    mynfsserver.vm.network "private_network", ip: "10.10.17.100"
+    mynfsserver.vm.provider "virtualbox" do |vb|
+        vb.cpus = 1
+        vb.memory = "512"
+    end
+    mynfsserver.vm.provision "shell" do |s|
+      s.inline = <<-SHELL
+      apk add python3
+      SHELL
+    end
+    mynfsserver.vm.provision "ansible" do |ansible|
+      ansible.playbook = "nfs-server.yml"
+    end
+  end
+
   nodes.each do |node|
     config.vm.define node[:hostname] do |nodeconfig|
       nodeconfig.vm.box = "generic/alpine318"
       nodeconfig.vm.hostname = node[:hostname]
       nodeconfig.vm.network "private_network", ip: node[:ip]
-      nodeconfig.vm.provider "qemu" do |qe|
-        qe.arch = "x86_64"
-        qe.machine = "q35"
-        qe.cpu = "qemu64"
-        qe.net_device = "virtio-net-pci"
-        qe.qemu_dir = "/usr/local/share/qemu"
-        qe.ssh_port = 2222 + nodes.index(node)
+      nodeconfig.vm.provider "virtualbox" do |vb|
+        vb.memory = 512
+        vb.cpus = 1
       end
       nodeconfig.vm.provision "shell" do |s|
         ssh_pub_key = File.readlines(node[:ssh_key]).first.strip
@@ -24,11 +40,14 @@ Vagrant.configure("2") do |config|
         sed -i 's/PasswordAuthentication yes/PasswordAuthentication no/g' /etc/ssh/sshd_config
         sed -i 's/PubkeyAuthentication no/PubkeyAuthentication yes/g' /etc/ssh/sshd_config
         service sshd restart
+        apk add python3
+        mkdir /share
         SHELL
+      end
+      nodeconfig.vm.provision "ansible" do |ansible|
+        ansible.playbook = "nfs-client.yml"
       end
     end
   end
-  config.vm.provision "ansible" do |ansible|
-    ansible.playbook = "playbook.yml"
-  end
+  
 end
