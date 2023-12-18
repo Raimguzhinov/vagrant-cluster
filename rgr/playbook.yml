@@ -8,6 +8,7 @@
       yum:
         name: 
           - openmpi
+          - openmpi-devel
         state: present
     
     - include_tasks: nfs-client.yml
@@ -58,8 +59,19 @@
         name: ntpd
         state: started
       tags: ntp
+    
+    - name: Add OpenMPI bin and lib directories to PATH and LD_LIBRARY_PATH
+      lineinfile:
+        dest: /home/vagrant/.bashrc
+        line: "{{ item }}"
+        insertafter: EOF
+      loop:
+        - 'export PATH=/usr/lib64/openmpi/bin:$PATH'
+        - 'export LD_LIBRARY_PATH=/usr/lib64/openmpi/lib:$LD_LIBRARY_PATH'
 
-
+    - name: Load the new environment settings
+      shell: source /home/vagrant/.bashrc
+    
     - name: Enable slurmd
       shell: "systemctl enable slurmd.service"
       notify: Start slurmd

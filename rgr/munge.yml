@@ -12,5 +12,8 @@
       - munge-libs
       - munge-devel
       - rng-tools
+      - openmpi
+      - openmpi-devel
       - neovim
+      - git
     state: present
