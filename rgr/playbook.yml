@@ -12,6 +12,7 @@
         state: present
     
     - include_tasks: nfs-client.yml
+    - include_tasks: groups.yml
     - include_tasks: keysync.yml
 
     - name: Install SLURM
@@ -69,11 +70,11 @@
         - 'export PATH=/usr/lib64/openmpi/bin:$PATH'
         - 'export LD_LIBRARY_PATH=/usr/lib64/openmpi/lib:$LD_LIBRARY_PATH'
 
-    - name: Load the new environment settings
-      shell: source /home/vagrant/.bashrc
-    
     - name: Enable slurmd
       shell: "systemctl enable slurmd.service"
+    
+    - name: Load the new environment settings
+      shell: source /home/vagrant/.bashrc
       notify: Start slurmd
 
   handlers:

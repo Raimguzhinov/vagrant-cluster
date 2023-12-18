@@ -45,6 +45,8 @@
         owner: slurm
         group: slurm
         mode: "0644"
+      notify: Stop firewalld
+      notify: Disable firewall
 
     - name: Add OpenMPI bin and lib directories to PATH and LD_LIBRARY_PATH
       lineinfile:
@@ -54,16 +56,24 @@
       loop:
         - 'export PATH=/usr/lib64/openmpi/bin:$PATH'
         - 'export LD_LIBRARY_PATH=/usr/lib64/openmpi/lib:$LD_LIBRARY_PATH'
-
-    - name: Load the new environment settings
-      shell: source /home/vagrant/.bashrc
-
+    
     - name: Enable slurmctld
       shell: "systemctl enable slurmctld.service"
       notify: Start slurmctld
+    
+    - name: Load the new environment settings
+      shell: source /home/vagrant/.bashrc
 
   handlers:
     - name: Start slurmctld
       service:
         name: slurmctld
         state: started
+    - name: Stop firewall
+      service:
+        name: firewalld
+        state: stopped
+    - name: Disable firewall
+      service:
+        name: firewalld
+        enabled: no
