@@ -1,0 +1,27 @@
+---
+- include_tasks: munge.yml
+
+- name: Start rngd service
+  service:
+    name: rngd
+    state: started
+
+- name: Generate MUNGE key
+  command: /usr/sbin/create-munge-key -r
+  ignore_errors: yes
+
+- name: Create munge.key file
+  shell: "dd if=/dev/urandom bs=1 count=1024 > /etc/munge/munge.key"
+
+- name: Set ownership for munge.key
+  file:
+    path: /etc/munge/munge.key
+    owner: munge
+    group: munge
+    mode: '0400'
+
+- name: Share munge.key file
+  shell: "mkdir -p /home/vagrant/nfs_test/munge && cp /etc/munge/munge.key /home/vagrant/nfs_test/munge"
+
+- name: Start MUNGE
+  shell: "systemctl enable munge && systemctl start munge"

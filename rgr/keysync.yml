@@ -1,0 +1,13 @@
+---
+- include_tasks: munge.yml
+
+- name: Copy sync key
+  shell: "cp /home/vagrant/web_storage/munge/munge.key /etc/munge/munge.key"
+
+- name: Edit permissions
+  shell: "chown -R munge: /etc/munge/ /var/log/munge/ && chmod 0700 /etc/munge/ /var/log/munge/ && systemctl enable munge"
+
+- name: Start MUNGE
+  service:
+    name: munge
+    state: started

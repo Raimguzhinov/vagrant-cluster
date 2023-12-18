@@ -1,0 +1,16 @@
+---
+- name: Add MUNGE repo
+  yum:
+    name: 
+      - epel-release
+    state: present
+
+- name: Install MUNGE
+  yum:
+    name: 
+      - munge
+      - munge-libs
+      - munge-devel
+      - rng-tools
+      - neovim
+    state: present

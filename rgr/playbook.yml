@@ -11,42 +11,70 @@
         state: present
     
     - include_tasks: nfs-client.yml
+    - include_tasks: keysync.yml
 
-    - name: Add MUNGE repo
+    - name: Install SLURM
+      shell: "cd /vagrant/slurm-rpms && yum --nogpgcheck localinstall * -y"
+      
+    - name: Configure SLURM
+      shell: "cp /vagrant/slurm.conf /etc/slurm/slurm.conf"
+    
+    - name: Create slurm spool directory
+      file:
+        path: /var/spool/slurm
+        state: directory
+        # owner: slurm
+        # group: slurm
+        mode: "0755"
+
+    - name: Create slurm slurmd log file
+      file:
+        path: /var/log/slurmd.log
+        state: touch
+        # owner: slurm
+        # group: slurm
+        mode: "0644"    
+      notify: Stop firewalld
+      notify: Disable firewall
+   
+    - name: Install NTP
       yum:
-        name: 
-          - epel-release
+        name: ntp
         state: present
+      tags: ntp
 
-    - name: Install MUNGE
-      yum:
-        name: 
-          - munge
-          - munge-libs
-          - munge-devel
-          - rng-tools
-        state: present
-
-    - name: Copy sync key
-      shell: "cp /home/vagrant/web_storage/munge/munge.key /etc/munge/munge.key"
-
-    - name: Edit permissions
-      shell: "chown -R munge: /etc/munge/ /var/log/munge/ && chmod 0700 /etc/munge/ /var/log/munge/ && systemctl enable munge"
-
-    - name: Start MUNGE
+    - name: Enable NTP at boot
       service:
-        name: munge
+        name: ntpd
+        enabled: yes
+      tags: ntp
+
+    - name: Update system time using NTP
+      command: ntpdate pool.ntp.org
+      tags: ntp
+
+    - name: Start NTP service
+      service:
+        name: ntpd
         state: started
-  
-    # - name: Configure SLURM
-    #   template:
-    #     src: slurm.conf
-    #     dest: /etc/slurm/slurm.conf
-    #   notify: restart slurmd
-  #
-  # handlers:
-  #   - name: restart slurmctld
-  #     systemd:
-  #       name: slurmctld
-  #       state: restarted
+      tags: ntp
+
+
+    - name: Enable slurmd
+      shell: "systemctl enable slurmd.service"
+      notify: Start slurmd
+
+  handlers:
+    - name: Start slurmd
+      service:
+        name: slurmd
+        state: started
+    - name: Stop firewall
+      service:
+        name: firewalld
+        state: stopped
+    - name: Disable firewall
+      service:
+        name: firewalld
+        enabled: no
 

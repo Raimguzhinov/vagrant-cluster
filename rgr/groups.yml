@@ -1,0 +1,30 @@
+---
+- name: Create MUNGE group
+  group:
+    name: munge
+    gid: 991
+
+- name: Create MUNGE user
+  user:
+    name: munge
+    comment: "MUNGE Uid 'N' Gid Emporium"
+    home: /var/lib/munge
+    uid: 991
+    group: munge
+    shell: /sbin/nologin
+    system: yes
+
+- name: Create SLURM group
+  group:
+    name: slurm
+    gid: 992
+
+- name: Create SLURM user
+  user:
+    name: slurm
+    comment: "SLURM workload manager"
+    home: /var/lib/slurm
+    uid: 992
+    group: slurm
+    shell: /bin/bash
+    system: yes

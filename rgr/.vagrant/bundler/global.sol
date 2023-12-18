@@ -1,1 +1,1 @@
-{"dependencies":[["vagrant-qemu",["= 0.3.5"]]],"checksum":"2978dc2a31fe1e2ba8b06ef1119497012cd62eae711bf4e1a511b72c2243a346","vagrant_version":"2.4.0"}
+{"dependencies":[["vagrant-qemu",["= 0.3.5"]],["net-ssh",[">= 2.6.5","< 8.0.0"]],["net-scp",[">= 1.1"]],["log4r",["~> 1.1"]],["vagrant-scp",["= 0.5.9"]]],"checksum":"70aa778bda8612037e3e180d17bfe2b700b6295c9c195afec440248a0ca9476f","vagrant_version":"2.4.0"}
