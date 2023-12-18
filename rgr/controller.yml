@@ -1,0 +1,117 @@
+---
+- name: Configure and Install Cluster
+  hosts: all
+  become: yes
+  
+  tasks:
+    
+    - include_tasks: nfs-server.yml
+    
+    - name: Create MUNGE group
+      group:
+        name: munge
+        gid: 991
+
+    - name: Create MUNGE user
+      user:
+        name: munge
+        comment: "MUNGE Uid 'N' Gid Emporium"
+        home: /var/lib/munge
+        uid: 991
+        group: munge
+        shell: /sbin/nologin
+        system: yes
+    
+    - name: Create SLURM group
+      group:
+        name: slurm
+        gid: 992
+
+    - name: Create SLURM user
+      user:
+        name: slurm
+        comment: "SLURM workload manager"
+        home: /var/lib/slurm
+        uid: 992
+        group: slurm
+        shell: /bin/bash
+        system: yes
+    
+    - name: Add MUNGE repo
+      yum:
+        name: 
+          - epel-release
+        state: present
+
+    - name: Install MUNGE
+      yum:
+        name: 
+          - munge
+          - munge-libs
+          - munge-devel
+          - rng-tools
+        state: present
+    
+    - name: Start rngd service
+      service:
+        name: rngd
+        state: started
+
+    - name: Generate MUNGE key
+      command: /usr/sbin/create-munge-key -r
+      ignore_errors: yes
+
+    - name: Create munge.key file
+      shell: "dd if=/dev/urandom bs=1 count=1024 > /etc/munge/munge.key"
+
+    - name: Set ownership for munge.key
+      file:
+        path: /etc/munge/munge.key
+        owner: munge
+        group: munge
+        mode: '0400'
+
+    - name: Share munge.key file
+      shell: "mkdir -p /home/vagrant/nfs_test/munge && cp /etc/munge/munge.key /home/vagrant/nfs_test/munge"
+
+    - name: Start MUNGE
+      shell: "systemctl enable munge && systemctl start munge"
+
+    - name: Install SLURM dependencies
+      yum:
+        name: 
+          - openssl
+          - openssl-devel
+          - pam-devel
+          - numactl
+          - numactl-devel
+          - hwloc
+          - hwloc-devel
+          - lua
+          - lua-devel
+          - readline-devel
+          - rrdtool-devel
+          - ncurses-devel
+          - man2html
+          - libibmad 
+          - libibumad
+          - rpm-build
+          - wget
+    
+    - name: Download SLURM
+      shell: "cd /home/vagrant/nfs_test && wget https://download.schedmd.com/slurm/slurm-23.11.1.tar.bz2"
+
+    # - name: Extract SLURM
+    #   shell: tar --bzip -x -f slurm*tar.bz2
+    
+    - name: Build SLURM
+      shell: "cd /home/vagrant/nfs_test && rpmbuild -ta slurm-23.11.1.tar.bz2"
+
+    - name: Move SLURM rpms
+      shell: "cd /root/rpmbuild/RPMS/x86_64 && mkdir /home/vagrant/nfs_test/slurm-rpms && cp * /home/vagrant/nfs_test/slurm-rpms"
+
+    # - name: Configure SLURM
+    #   template:
+    #     src: slurm.conf
+    #     dest: /etc/slurm/slurm.conf
+    #   notify: restart slurmctld

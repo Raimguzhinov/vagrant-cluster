@@ -1,6 +1,6 @@
 ---
 - name: Install nfs-utils
-  apk:
+  yum:
     name: 
       - nfs-utils
     state: present

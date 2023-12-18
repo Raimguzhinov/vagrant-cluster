@@ -1,23 +1,48 @@
 ---
-- name: Configure and Install Cluster
+- name: Configure worker node
   hosts: all
   become: yes
 
   tasks:
     - name: Install required packages
-      apk:
+      yum:
         name: 
-          # - slurm
           - openmpi
         state: present
     
     - include_tasks: nfs-client.yml
-  #
-  #   - name: Configure SLURM
-  #     template:
-  #       src: slurm.conf
-  #       dest: /etc/slurm/slurm.conf
-  #     notify: restart slurmctld
+
+    - name: Add MUNGE repo
+      yum:
+        name: 
+          - epel-release
+        state: present
+
+    - name: Install MUNGE
+      yum:
+        name: 
+          - munge
+          - munge-libs
+          - munge-devel
+          - rng-tools
+        state: present
+
+    - name: Copy sync key
+      shell: "cp /home/vagrant/web_storage/munge/munge.key /etc/munge/munge.key"
+
+    - name: Edit permissions
+      shell: "chown -R munge: /etc/munge/ /var/log/munge/ && chmod 0700 /etc/munge/ /var/log/munge/ && systemctl enable munge"
+
+    - name: Start MUNGE
+      service:
+        name: munge
+        state: started
+  
+    # - name: Configure SLURM
+    #   template:
+    #     src: slurm.conf
+    #     dest: /etc/slurm/slurm.conf
+    #   notify: restart slurmd
   #
   # handlers:
   #   - name: restart slurmctld
