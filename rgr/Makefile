@@ -4,11 +4,12 @@ setup:
 	vagrant ssh dias -- -t 'source /home/vagrant/.bashrc' && \
 	vagrant ssh yana -- -t 'source /home/vagrant/.bashrc'
 
-start:
+ssh:
 	vagrant ssh controller
 
 sinfo:
 	vagrant ssh controller -- -t 'sinfo'
+	vagrant ssh controller -- -t 'squeue'
 
 sping:
 	vagrant ssh dias -- -t 'scontrol ping'
@@ -29,7 +30,17 @@ reset-nodes:
 	vagrant ssh controller -- -t 'scontrol update NodeName=yana State=resume'
 
 benchmark:
-	@printf "\n>>> Running a benchmark job\n"
+	@printf "\n>>> Running a benchmark\n"
+	@printf "\n>>> Output:\n"
+	@printf "\n>>> Master-node (controller):\n" && \
+	vagrant ssh controller -- -t '/vagrant/analysis.sh'
+	@printf "\n>>> Worker 1 (dias):\n" && \
+	vagrant ssh dias -- -t '/vagrant/analysis.sh'
+	@printf "\n>>> Worker 2 (yana):\n" && \
+	vagrant ssh yana -- -t '/vagrant/analysis.sh'
+
+monitor:
+	@printf "\n>>> Running a monitor\n"
 	@printf "\n>>> Output:\n"
 	@printf "\n>>> Worker 1 (dias):\n" && \
 	open http://10.10.17.113:8080/monitorix
@@ -48,6 +59,11 @@ mpi-test:
 	vagrant ssh dias -- -t 'cat web_storage/mpi-hello.out'
 	@printf "\n>>> Worker 2 (yana):\n" && \
 	vagrant ssh yana -- -t 'cat web_storage/mpi-hello.out'
+
+halt:
+	vagrant ssh controller -- -t 'sudo shutdown -h now'
+	vagrant ssh dias -- -t 'sudo shutdown -h now'
+	vagrant ssh yana -- -t 'sudo shutdown -h now'
 
 stop:
 	vagrant halt controller
