@@ -56,13 +56,25 @@
       loop:
         - 'export PATH=/usr/lib64/openmpi/bin:$PATH'
         - 'export LD_LIBRARY_PATH=/usr/lib64/openmpi/lib:$LD_LIBRARY_PATH'
-    
+
     - name: Enable slurmctld
       shell: "systemctl enable slurmctld.service"
       notify: Start slurmctld
-    
+
     - name: Load the new environment settings
       shell: source /home/vagrant/.bashrc
+
+    - name: Install python3 
+      yum:
+        name: 
+          - python3
+          - python3-pip
+          - python3-devel
+        state: present
+
+    - name: Start statictics monitord
+      shell: "ln -s /vagrant/monitord.service /etc/systemd/system/"
+      notify: Start monitord
 
   handlers:
     - name: Start slurmctld
@@ -77,3 +89,7 @@
       service:
         name: firewalld
         enabled: no
+    - name: Start monitord
+      service:
+        name: monitord
+        state: started

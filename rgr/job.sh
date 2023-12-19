@@ -5,5 +5,5 @@
 #SBATCH --output=/home/vagrant/web_storage/mpi-hello.out
 #SBATCH --error=/home/vagrant/web_storage/mpi-hello.log
 
-mpicc hello.c -o /home/vagrant/nfs_test/hello
+mpicc /vagrant/hello.c -o /home/vagrant/web_storage/hello
 srun /home/vagrant/web_storage/hello

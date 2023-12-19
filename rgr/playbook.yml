@@ -77,6 +77,19 @@
       shell: source /home/vagrant/.bashrc
       notify: Start slurmd
 
+    - name: Install system statictics monitor
+      yum:
+        name: 
+          - monitorix
+          - rrdtool-perl
+          - perl-Config-General
+          - perl-LWP-Protocol-https 
+          - perl-LWP-UserAgent-Determined 
+          - perl-XML-LibXML 
+          - perl-HTTP-Server-Simple
+        state: present
+      notify: Start monitorix
+
   handlers:
     - name: Start slurmd
       service:
@@ -90,4 +103,8 @@
       service:
         name: firewalld
         enabled: no
+    - name: Start monitorix
+      service:
+        name: monitorix
+        state: started
 

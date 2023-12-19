@@ -28,16 +28,26 @@ reset-nodes:
 	vagrant ssh controller -- -t 'scontrol update NodeName=dias State=resume' && \
 	vagrant ssh controller -- -t 'scontrol update NodeName=yana State=resume'
 
+benchmark:
+	@printf "\n>>> Running a benchmark job\n"
+	@printf "\n>>> Output:\n"
+	@printf "\n>>> Worker 1 (dias):\n" && \
+	open http://10.10.17.113:8080/monitorix
+	@printf "\n>>> Worker 2 (yana):\n" && \
+	open http://10.10.17.112:8080/monitorix
+	@printf "\n>>> Master-node (controller):\n" && \
+	open http://10.10.17.100:8082	
+
 mpi-test:
 	@printf "\n>>> Running a test job\n"
 	@vagrant ssh controller -- -t 'sbatch /vagrant/job.sh'
 	@printf "\n>>> Output:\n"
 	@printf "\n>>> Master-node (controller):\n" && \
-	vagrant ssh controller -- -t 'cat /home/vagrant/nfs_test/mpi-hello.out'
+	vagrant ssh controller -- -t 'cat nfs_test/mpi-hello.out'
 	@printf "\n>>> Worker 1 (dias):\n" && \
-	vagrant ssh dias -- -t 'cat /home/vagrant/web_storage/mpi-hello.out'
+	vagrant ssh dias -- -t 'cat web_storage/mpi-hello.out'
 	@printf "\n>>> Worker 2 (yana):\n" && \
-	vagrant ssh yana -- -t 'cat /home/vagrant/web_storage/mpi-hello.out'
+	vagrant ssh yana -- -t 'cat web_storage/mpi-hello.out'
 
 stop:
 	vagrant halt controller

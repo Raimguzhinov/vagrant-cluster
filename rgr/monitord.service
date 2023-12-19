@@ -1,0 +1,12 @@
+[Unit]
+Description="monitordd"
+
+[Service]
+Type=simple
+User=root
+Group=root
+ExecStart=/bin/sh -c 'cd /vagrant/slurm_web && python3 -m venv myvenv && source /vagrant/slurm_web/myvenv/bin/activate && cd /vagrant/slurm_web && pip3 install --upgrade pip && pip3 install -r requirements.txt && /vagrant/slurm_web/myvenv/bin/python3 app.py --host 10.10.17.100 --port 8082'
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

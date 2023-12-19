@@ -1,0 +1,3 @@
+[submodule "rgr/slurm_web"]
+	path = rgr/slurm_web
+	url = git@github.com:TengdaHan/slurm_web.git
