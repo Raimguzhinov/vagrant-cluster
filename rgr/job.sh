@@ -6,4 +6,4 @@
 #SBATCH --error=/home/vagrant/web_storage/mpi-hello.log
 
 mpicc /vagrant/hello.c -o /home/vagrant/web_storage/hello
-srun /home/vagrant/web_storage/hello
+mpirun --allow-run-as-root -np 2 /home/vagrant/web_storage/hello

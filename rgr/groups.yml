@@ -1,4 +1,12 @@
 ---
+- name: Ensure user IDs match
+  user:
+    name: "{{ item }}"
+    uid: 1001
+  with_items:
+    - dias
+    - yana
+
 - name: Create MUNGE group
   group:
     name: munge
